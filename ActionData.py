@@ -1,5 +1,5 @@
 from pandas import read_csv
-from VideoGame import VideoGame
+from Laptop import Laptop
 NORECORD = 'chưa có thông tin'
 
 class ActionData:
@@ -17,20 +17,20 @@ class ActionData:
         # _ là index, iterrows là mảng dữ liệu (thư viện pandas)
         for _, row in dataFrame.iterrows():
             # nạp dữ liệu file csv vào đối tượng VideoGame và lưu vào private games[]
-            VideoGame(row)
+            Laptop(row)
         # lưu dữ liệu games của VideoGame vào game_list
-        game_list = VideoGame.games
+        game_list = Laptop.laptops
         return game_list
     
     # Thay đổi nội dung của các trò chơi được đề xuất ở định dạng được chỉ định
     def change_display(self):
         properties = ActionData.properties
         selection = ActionData.selection
-        display_message = '\nTìm thấy cho bạn {} trò chơi, hiện đang hiển thị {} mục\n\nTên trò chơi:{}\nLoại trò chơi:{}\nThời gian phát hành:{}\nNền tảng bán hàng:{}\nNhà phát triển:{}\nĐánh giá phương tiện truyền thông:{}\nĐánh giá phổ biến:{}\nBán trò chơi(triệu):{}\nXếp hạng trò chơi:{}\n'.format(
+        display_message = '\nTìm thấy cho bạn {} Laptop, hiện đang hiển thị {} mục\nHãng :{}\nTên :{}\nLoại :{}\nMàn hình:{}\nKích thước màn hình:{}\nCPU:{}\nRAM:{}\nBộ nhớ:{}\nGPU:{}\nHệ điều hành:{}\nPhiên bản hệ điều hành:{}\nCân nặng:{}\nGiá($):{}\n'.format(
                                 len(properties), selection+1,
-                                properties[selection].name, properties[selection].genre,properties[selection].year_of_release, properties[selection].platform,
-                                properties[selection].developer, properties[selection].critic_score,properties[selection].user_score, properties[selection].global_sales,
-                                properties[selection].rating)
+                                properties[selection].brand, properties[selection].model,properties[selection].category, properties[selection].screen,
+                                properties[selection].screen_size, properties[selection].cpu,properties[selection].ram, properties[selection].storage,
+                                properties[selection].gpu, properties[selection].operating_system, properties[selection].operating_system_version, properties[selection].weight,properties[selection].price)
         return display_message
 
     def goto_next_property(self):

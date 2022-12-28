@@ -4,7 +4,7 @@ from time import sleep
 from pandas import read_csv
 from tkinter import Label, Frame, Button, Checkbutton, Tk, IntVar, HORIZONTAL, Scale, filedialog
 from tkinter import ttk
-from VideoGame import VideoGame
+from Laptop import Laptop
 from ActionData import ActionData
 from Evaluation import Evaluation
 
@@ -14,9 +14,7 @@ intVar = []
 # Bản ghi thứ n hiện đang được hiển thị, có thể được chuyển đổi bằng nút
 selection = 0
 # Lưu tất cả các bản ghi trò chơi trong cơ sở dữ liệu
-game_list = []
-# Trò chơi đáp ứng tiêu chí tìm kiếm của người dùng
-rating_list =  ['E10+', 'T', 'K-A', 'RP', 'E', 'EC', 'AO', 'M']
+laptop_list = []
 
 # [Gọi phương thức lớp ActionData] Thay đổi nội dung hiển thị giao diện người dùng theo tương tác của người dùng
 # Phương thức WHEN CHANGED kích hoạt goto_prev_property và goto_next_property
@@ -35,28 +33,23 @@ def properties_filter():
     # Nhận các điều kiện truy vấn do người dùng chọn trong giao diện từ mỗi thành phần
     ActionData.properties.clear()
     
-    args = {'pf': platform_select.get(),
-            'ge': genre_select.get(),
-            'lb': int(from_year_select.get()),
-            'rb': int(to_year_select.get()),
-            'cs': int(critical_score_scale.get()),
-            'us': round((user_score_scale.get()),1)}
-    allowed_rating = []
-    for idx in range(len(intVar)):
-        if intVar[idx].get():
-            allowed_rating.append(rating_list[idx])
-    args['ar'] = allowed_rating
+    args = {'brand': brand_select.get(),
+            'cpu': cpu_select.get(),
+            'category': category_select.get(),
+            'ram': ram_select.get(),
+            'storage': storage_select.get()}
+
     evaluate = Evaluation(args)
     evaluate.print_rule()
 
-    for game in game_list:
-        if evaluate.qualified(game):
-            ActionData.properties.append(game)
+    for laptop in laptop_list:
+        if evaluate.qualified(laptop):
+            ActionData.properties.append(laptop)
     
     # Kết quả lựa chọn thiết bị đầu cuối đáp ứng yêu cầu của người dùng
     print('【RESULT】', len(ActionData.properties))
     # Sắp xếp kết quả tìm kiếm theo năm theo thứ tự ngược lại
-    ActionData.properties = sorted(ActionData.properties, key=lambda game: game.year_of_release if type(game.year_of_release) == int else -1, reverse=True)
+    ActionData.properties = sorted(ActionData.properties, key=lambda laptop: laptop.price if type(laptop.price) == int else -1, reverse=True)
     # Hiển thị bản ghi đầu tiên phù hợp với yêu cầu của người dùng trong cửa sổ
     # Cho dù số lượng kết quả kiểm tra là> 0
     if len(ActionData.properties):
@@ -79,10 +72,10 @@ if __name__ == '__main__':
     result_window = Frame(window, width=1024, height=180)
     # Giữ kích thước cửa sổ không thay đổi
     result_window.propagate(0)
-    message.grid(row=0, columnspan=5)
+    message.grid(row=0, columnspan=10)
     result_message = Label(result_window, text='Chưa có nội dung được đề xuất')
     result_message.pack()
-    result_window.grid(row=1, columnspan=5)
+    result_window.grid(row=1, columnspan=10)
 
     # Hàng thứ hai đặt nút, khi có nhiều thông tin được đề xuất, hãy sử dụng nút để chuyển
     prev_btn = Button(window, text='Trước', command=lambda:switch_property('prev'))
@@ -91,46 +84,50 @@ if __name__ == '__main__':
     next_btn.grid(row=2, column=4, ipadx=20)
 
     # Dòng thứ ba được sử dụng để chọn nền tảng và loại trò chơi của trò chơi
-    platform_label = Label(window, text='Nền tảng máy chủ', font=('tMicrosoft YaHei',12,'bold'))
-    genre_label = Label(window, text='Loại trò chơi', font=('tMicrosoft YaHei',12,'bold'))
-    platform_select = ttk.Combobox(window)
-    genre_select = ttk.Combobox(window)
-    platform_label.grid(row=3, column=0)
-    platform_select.grid(row=3, column=1)
-    genre_label.grid(row=3, column=2)
-    genre_select.grid(row=3, column=3)
+    brand_label = Label(window, text='Hãng Lap top', font=('tMicrosoft YaHei',12,'bold'))
+    cpu_label = Label(window, text='CPU', font=('tMicrosoft YaHei',12,'bold'))
+    category_label = Label(window, text='Loại Lap top', font=('tMicrosoft YaHei',12,'bold'))
+    brand_select = ttk.Combobox(window)
+    cpu_select = ttk.Combobox(window)
+    category_select= ttk.Combobox(window)
+    brand_label.grid(row=3, column=0)
+    brand_select.grid(row=3, column=1)
+    category_label.grid(row=3, column=2)
+    category_select.grid(row=3, column=3)
+    cpu_label.grid(row=4, column=0)
+    cpu_select.grid(row=4, column=1)
 
     # Dòng thứ tư, chọn khoảng thời gian phát hành trò chơi
-    time_range_labelA = Label(window, text='Thời gian phát hành từ', font=('tMicrosoft YaHei',12,'bold'))
-    time_range_labelB = Label(window, text='Thời gian phát hành đến', font=('tMicrosoft YaHei',12,'bold'))
-    from_year_select = ttk.Combobox(window)
-    to_year_select = ttk.Combobox(window)
-    time_range_labelA.grid(row=4, column=0)
-    time_range_labelB.grid(row=4, column=2)
-    from_year_select.grid(row=4, column=1)
-    to_year_select.grid(row=4, column=3)
+    ram_label = Label(window, text='RAM', font=('tMicrosoft YaHei',12,'bold'))
+    storage_label = Label(window, text='Bộ nhớ', font=('tMicrosoft YaHei',12,'bold'))
+    storage_select = ttk.Combobox(window)
+    ram_select = ttk.Combobox(window)
+    ram_label.grid(row=4, column=2)
+    ram_select.grid(row=4, column=3)
+    storage_label.grid(row=4, column=4)
+    storage_select.grid(row=4, column=5)
 
-    # Dòng thứ năm, yêu cầu điểm số trò chơi
-    critical_score_scale = Scale(window, label='Xếp hạng phương tiện truyền thông cao hơn', from_=0, to=100, orient=HORIZONTAL,
-             length=400, showvalue=1, tickinterval=10, resolution=1)
-    critical_score_scale.grid(row=5, column=0, columnspan=2)
-    user_score_scale = Scale(window, label='Đánh giá của công chúng cao hơn', from_=0, to=10, orient=HORIZONTAL,
-             length=400, showvalue=1, tickinterval=1, resolution=0.1)
-    user_score_scale.grid(row=5, column=2, columnspan=2)
+    # # Dòng thứ năm, yêu cầu điểm số trò chơi
+    # critical_score_scale = Scale(window, label='Xếp hạng phương tiện truyền thông cao hơn', from_=0, to=100, orient=HORIZONTAL,
+    #          length=400, showvalue=1, tickinterval=10, resolution=1)
+    # critical_score_scale.grid(row=5, column=0, columnspan=2)
+    # user_score_scale = Scale(window, label='Đánh giá của công chúng cao hơn', from_=0, to=10, orient=HORIZONTAL,
+    #          length=400, showvalue=1, tickinterval=1, resolution=0.1)
+    # user_score_scale.grid(row=5, column=2, columnspan=2)
 
     # Dòng thứ sáu, xác nhận để gửi các yêu cầu về chỉ số trò chơi đã chọn
     submit_btn = Button(window, text='Gửi đi', font=('Microsoft YaHei', 15), command=properties_filter)
-    submit_btn.grid(row=6, column=2, ipadx=70, ipady=10, pady=10)
+    submit_btn.grid(row=7, column=2, ipadx=70, ipady=10, pady=10)
 
-    # Cột ngoài cùng bên phải đặt danh sách Nhóm để chọn xếp hạng trò chơi
-    rating_frame = Frame(window)
-    rating_frame.grid(row=3, column=4, rowspan=3)
-    rating_note_label = Label(rating_frame, text='Lựa chọn xếp hạng trò chơi', font=('tMicrosoft YaHei',12,'bold'))
-    rating_note_label.pack()
-    for idx in range(len(rating_list)):
-        intVar.append(IntVar(value=1))
-        check = Checkbutton(rating_frame, text=rating_list[idx], variable=intVar[idx], onvalue=1, offvalue=0)
-        check.pack(side='top', expand='yes', fill='both')
+    # # Cột ngoài cùng bên phải đặt danh sách Nhóm để chọn xếp hạng trò chơi
+    # rating_frame = Frame(window)
+    # rating_frame.grid(row=3, column=4, rowspan=3)
+    # rating_note_label = Label(rating_frame, text='Lựa chọn xếp hạng trò chơi', font=('tMicrosoft YaHei',12,'bold'))
+    # rating_note_label.pack()
+    # for idx in range(len(rating_list)):
+    #     intVar.append(IntVar(value=1))
+    #     check = Checkbutton(rating_frame, text=rating_list[idx], variable=intVar[idx], onvalue=1, offvalue=0)
+    #     check.pack(side='top', expand='yes', fill='both')
     
     # [Tải thuộc tính] Tải tệp csv sau khi tải giao diện người dùng
     # Tạo đối tượng ActionData action_data_agent
@@ -143,7 +140,7 @@ if __name__ == '__main__':
         start = time.time()
         print('SYSTEM: Tệp csv đang tải...')
         action_data_agent = ActionData()
-        game_list = action_data_agent.load_properties(csv_filepath)
+        laptop_list = action_data_agent.load_properties(csv_filepath)
         counter = round(time.time() - start, 2)
         result_message['text'] = 'Dữ liệu được tải, mất thời gian{}s, Chưa có nội dung được đề xuất'.format(counter)
         print('SYSTEM: Tệp csv đã được tải, mất thời gian{}s'.format(counter))
@@ -154,17 +151,17 @@ if __name__ == '__main__':
         exit()
 
     # Tải nội dung của menu thả xuống trên trang chủ theo dữ liệu
-    platform_select['value'] = sorted(list(VideoGame.Platform))
-    genre_select['value'] = sorted(list(VideoGame.Genre))
-    from_year_select['value'] = list(VideoGame.YearOfRelease)
-    to_year_select['value'] = list(VideoGame.YearOfRelease)
-    platform_select.current(0)
-    genre_select.current(0)
-    from_year_select.current(0)
-    to_year_select.current(len(VideoGame.YearOfRelease)-1)
+    brand_select['value'] = sorted(list(Laptop.Brand))
+    cpu_select['value'] = sorted(list(Laptop.CPU))
+    category_select['value'] = sorted(list(Laptop.Category))
+    ram_select['value'] = sorted(list(Laptop.RAM))
+    storage_select['value'] = sorted(list(Laptop.Storage))
 
     # Được sử dụng cho các loại thuộc tính cụ thể và nội dung cụ thể trong các bảng đầu ra ban đầu
-    VideoGame.show_genre()
-    VideoGame.show_platform()
+    Laptop.show_brand()
+    Laptop.show_category()
+    Laptop.show_ram()
+    Laptop.show_cpu()
+    Laptop.show_storage()
 
     window.mainloop()
